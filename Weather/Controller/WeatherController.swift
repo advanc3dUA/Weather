@@ -38,7 +38,7 @@ class WeatherController: UIViewController {
 
     @IBAction func searchAction(_ sender: UIButton) {
         self.presentSearchAlertController(withTitle: "Select your city", message: nil, style: .alert) { [unowned self] handledCity in
-            self.networkWeatherManager.fetchCurrentWeather(for: handledCity)
+            self.networkWeatherManager.fetchCurrentWeather(forRequstType: .cityName(city: handledCity))
         }
     }
     
@@ -49,5 +49,20 @@ class WeatherController: UIViewController {
             self.feelsLikeTemperatureLabel.text = weather.feelsLikeTemperatureString
             self.weatherIconImageView.image = UIImage(systemName: weather.systemIconNameString)
         }
+    }
+}
+
+extension WeatherController: CLLocationManagerDelegate {
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        guard let location = locations.last else { return }
+        let latitude = location.coordinate.latitude
+        let longitude = location.coordinate.longitude
+        self.networkWeatherManager.fetchCurrentWeather(forRequstType: .coordinate(latitude: latitude, longitude: longitude))
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        print("test")
+        print(error.localizedDescription)
+        
     }
 }
