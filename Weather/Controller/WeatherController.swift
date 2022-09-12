@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import CoreLocation
 
 class WeatherController: UIViewController {
 
@@ -16,13 +17,23 @@ class WeatherController: UIViewController {
     
     var networkWeatherManager = NetworkWeatherManager()
     
+    lazy var locationManager: CLLocationManager = {
+       let lm = CLLocationManager()
+        lm.delegate = self
+        lm.desiredAccuracy = kCLLocationAccuracyKilometer
+        lm.requestWhenInUseAuthorization()
+        return lm
+    }()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         networkWeatherManager.onCompletion = { [weak self] currentWeather in
             guard let self = self else { return }
             self.updateUI(with: currentWeather)
         }
-        self.networkWeatherManager.fetchCurrentWeather(for: "London")
+        if CLLocationManager.locationServicesEnabled() {
+            locationManager.requestLocation()
+        }
     }
 
     @IBAction func searchAction(_ sender: UIButton) {
